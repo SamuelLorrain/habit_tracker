@@ -1,17 +1,22 @@
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, FixedOffset, Duration};
 
 pub struct Habit {
     pub name: String,
     pub date_begin: Option<DateTime<FixedOffset>>,
     pub date_end: Option<DateTime<FixedOffset>>,
+    pub interval: Option<Duration>
 }
 
 impl Habit {
-    pub fn new(name: String, date_begin: Option<DateTime<FixedOffset>>, date_end: Option<DateTime<FixedOffset>>) -> Habit{
+    pub fn new(name: String,
+               date_begin: Option<DateTime<FixedOffset>>,
+               date_end: Option<DateTime<FixedOffset>>,
+               duration: Option<Duration>) -> Habit{
         Habit{
             name,
             date_begin,
-            date_end
+            date_end,
+            duration
         }
     }
 
