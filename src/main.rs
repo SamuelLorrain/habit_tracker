@@ -16,14 +16,15 @@ fn main() {
     let mut h = Habit::new(
         String::from("Test"),
         Some(date_begin),
-        Some(date_end)
+        Some(date_end),
+        None,
+        None,
     );
-    println!("{} {:?} {:?}", h.name, h.date_begin, h.date_end);
 
     match h.check_end_date(&new_date_end) {
         Ok(_) => println!("Date successfully changed"),
         Err(x) => eprintln!("{}", x)
     }
 
-    println!("{} {:?} {:?}", h.name, h.date_begin, h.date_end);
+    println!("{}", h);
 }
