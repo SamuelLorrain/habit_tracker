@@ -1,13 +1,14 @@
 use chrono::{DateTime, FixedOffset, Duration};
 use std::fmt;
 
+#[derive(Debug)]
 pub struct Habit {
-    pub name: String,
-    pub date_begin: Option<DateTime<FixedOffset>>,
-    pub date_end: Option<DateTime<FixedOffset>>,
-    pub interval: Option<Duration>,
-    pub done: bool,
-    pub metadata: Option<String>
+    name: String,
+    date_begin: Option<DateTime<FixedOffset>>,
+    date_end: Option<DateTime<FixedOffset>>,
+    interval: Option<Duration>,
+    done: bool,
+    metadata: Option<String>
 }
 
 impl Habit {
@@ -39,7 +40,7 @@ impl Habit {
         }
     }
 
-    fn check_begin_date(&mut self, &date_begin: &DateTime<FixedOffset>) -> Result<&mut Habit, &str> {
+    pub fn check_begin_date(&mut self, &date_begin: &DateTime<FixedOffset>) -> Result<&mut Habit, &str> {
         match self.date_end {
             None => Ok(self),
             Some(end) => {
