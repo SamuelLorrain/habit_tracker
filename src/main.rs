@@ -1,8 +1,6 @@
-
 pub mod habit;
 
-use chrono::{DateTime, FixedOffset};
-
+use chrono::{DateTime, FixedOffset, Utc, Duration};
 use habit::{Habit};
 
 #[derive(Debug)]
@@ -15,20 +13,15 @@ struct Sprint {
 }
 
 fn main() {
-    let date_begin = DateTime::parse_from_rfc3339("2020-09-19T16:39:57-08:00")
-        .expect("Test");
-    let date_end = DateTime::parse_from_rfc3339("2020-10-19T16:39:57-08:00")
-        .expect("Test");
+    let date = Utc::now().naive_utc().date();
+    let new_date = date.succ();
+    let week = Duration::weeks(4);
+    let new_date_plus_one_week = new_date + week;
+    let h = Habit::default();
 
-    let mut h = Habit::default();
-
-    //let mut s = Sprint::new(
-    //    None,
-    //    date_begin,
-    //    date_end,
-    //    Some(String::from("Test"))
-    //);
-    //s.add_habit(h);
-
+    println!("{}", date);
+    println!("{}", new_date);
+    println!("{}", new_date_plus_one_week);
+    println!("{}", date.format("%Y-%m-%d %B %A"));
     println!("{:?}", h);
 }
