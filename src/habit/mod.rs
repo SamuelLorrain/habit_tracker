@@ -155,6 +155,19 @@ impl Habit {
             _ => NotDueToday,
         }
     }
+
+    pub fn done(&mut self, metadata: Option<String>) -> Result<bool, HabitInfo> {
+        match self.todo_today() {
+            TodoToday => {
+                self.history.push(HabitHistoryItem::new(
+                    &Utc::now().naive_utc(),
+                    &metadata
+                ));
+                return Ok(true);
+            }
+            x => Err(x)
+        }
+    }
 }
 
 impl Default for Habit {

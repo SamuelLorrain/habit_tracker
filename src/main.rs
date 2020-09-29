@@ -38,7 +38,6 @@ fn main() {
     //h.set_time_repeat(2);
     h.show();
 
-
     //h.push_history(&Utc::now().naive_utc(), &None);
     //println!("{:?}", h.history().last());
 
