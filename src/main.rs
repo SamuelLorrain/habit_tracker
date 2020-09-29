@@ -25,25 +25,29 @@ fn main() {
     h.set_end_type(&EndRepeatType::AfterOccurrences(5));
 
     //week
-    h.set_time_unit(&RepeatTimeUnit::Weeks);
-    h.set_weekdays(&Some(vec![Weekday::Mon, Weekday::Fri]));
+    //h.set_time_unit(&RepeatTimeUnit::Weeks);
+    //h.set_weekdays(&Some(vec![Weekday::Tue, Weekday::Fri]));
 
     //month
     h.set_time_unit(&RepeatTimeUnit::Months);
-    //h.set_repeat_month(&Some(RepeatMonth::DayOfMonth(5)));
-    h.set_repeat_month(&Some(RepeatMonth::DayOfWeek(2, Weekday::Thu)));
+    h.set_repeat_month(&Some(RepeatMonth::DayOfMonth(29)));
+    //h.set_repeat_month(&Some(RepeatMonth::DayOfWeek(2, Weekday::Thu)));
 
     //day
     //h.set_time_unit(&RepeatTimeUnit::Days);
     //h.set_time_repeat(2);
     h.show();
 
+    let mut h_iter = h.date_iter();
+
     //h.push_history(&Utc::now().naive_utc(), &None);
     //println!("{:?}", h.history().last());
 
-    println!("{:?}", h.next().unwrap());
-    println!("{:?}", h.next().unwrap());
-    println!("{:?}", h.next().unwrap());
-    println!("{:?}", h.next().unwrap());
-    println!("{:?}", h.next().unwrap());
+    //println!("{:?}", h.todo_today());
+
+    println!("{:?}", h_iter.next().unwrap());
+    println!("{:?}", h_iter.next().unwrap());
+    println!("{:?}", h_iter.next().unwrap());
+    println!("{:?}", h_iter.next().unwrap());
+    println!("{:?}", h_iter.next().unwrap());
 }

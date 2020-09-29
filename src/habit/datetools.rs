@@ -44,6 +44,7 @@ pub fn get_next_date_with_weekday(date: &NaiveDate, weekday: Weekday) -> NaiveDa
 
 pub fn get_next_date_with_monthday(date: &NaiveDate, month_day: usize) -> NaiveDate {
     let mut next_date = date.clone();
+
     if get_monthday(next_date) == month_day{
         next_date = next_date.succ();
     }

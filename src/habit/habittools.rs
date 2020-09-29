@@ -50,6 +50,13 @@ pub enum RepeatMonth {
     DayOfWeek(usize, Weekday)
 }
 
+#[derive(Debug)]
+pub enum HabitInfo {
+    AlreadyDoneToday,
+    ToDoToday,
+    NotDueToday,
+}
+
 //pub struct HabitIterator<'a> {
 //    //habit: &'a Habit,
 //    current_date: NaiveDate,

@@ -24,8 +24,6 @@ pub struct Habit {
     time_repeat: usize,
     weekdays: Option<Vec<Weekday>>,
     repeat_month: Option<RepeatMonth>,
-
-    next_occurrence: Option<NaiveDate>
 }
 
 // getters
@@ -40,7 +38,6 @@ impl Habit {
     pub fn time_repeat(&self)     -> usize                  { self.time_repeat }
     pub fn weekdays(&self)        -> &Option<Vec<Weekday>>  { &self.weekdays }
     pub fn repeat_month(&self)    -> &Option<RepeatMonth>   { &self.repeat_month }
-    pub fn next_occurrence(&self) -> &Option<NaiveDate>     { &self.next_occurrence }
 }
 
 // setters
@@ -133,28 +130,17 @@ impl Habit {
         }
     }
 
-    //pub fn is_active(&self) -> bool {
-    //    if Utc::now().naive_utc().date() < self.date_begin {
-    //        return false;
-    //    }
+    pub fn date_iter(&self) -> HabitDateIter {
+        HabitDateIter {
+            date_begin: self.date_begin.clone(),
+            time_unit: self.time_unit.clone(),
+            time_repeat: self.time_repeat.clone(),
 
-    //    match self.end_type {
-    //        Never => true,
-    //        On(date) => {
-    //            if Utc::now().naive_utc().date() > date {
-    //                return false;
-    //            }
-    //            true
-    //        },
-    //        AfterOccurrences(x) => {
-    //            self.history.len() < x // Pas sur du comportement là.
-    //            // Ici, c'est quand on a fait le truc x fois que c'est fini
-    //            // mais ça pourrait être -> à partir de la date de début, je vais faire
-    //            // l'action x fois, par exemple 5 fois avec un interval de 2 jours, soit
-    //            // j'arrète après 10 jours
-    //        }
-    //    }
-    //}
+            weekdays: self.weekdays.clone(),
+            repeat_month: self.repeat_month.clone(),
+            next_occurrence: None
+        }
+    }
 }
 
 impl Default for Habit {
@@ -176,22 +162,31 @@ impl Default for Habit {
             time_repeat: 1,
             weekdays: None,
             repeat_month: None,
-
-            next_occurrence: None,
         }
     }
 }
 
-impl Iterator for Habit {
+pub struct HabitDateIter {
+    date_begin: NaiveDate,
+    time_unit: RepeatTimeUnit,
+    time_repeat: usize,
+
+    weekdays: Option<Vec<Weekday>>,
+    repeat_month: Option<RepeatMonth>,
+
+    next_occurrence: Option<NaiveDate>
+}
+
+impl Iterator for HabitDateIter {
     type Item = NaiveDate;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.next_occurrence == None {
-            self.next_occurrence = Some(self.date_begin);
-        }
-
         match self.time_unit {
             Days => {
+                if self.next_occurrence == None {
+                    self.next_occurrence = Some(self.date_begin);
+                    return self.next_occurrence;
+                }
                 self.next_occurrence = Some(
                     self.next_occurrence.unwrap() + Duration::days(self.time_repeat as i64));
                 return self.next_occurrence;
@@ -200,6 +195,10 @@ impl Iterator for Habit {
                 match &self.weekdays {
                     None => None,
                     Some(weekdays) => {
+                        if self.next_occurrence == None {
+                            self.next_occurrence = Some(self.date_begin.pred());
+                        }
+
                         let date = weekdays.iter()
                             .map(|x| get_next_date_with_weekday(&self.next_occurrence.unwrap(),*x))
                             .min()
@@ -214,6 +213,9 @@ impl Iterator for Habit {
                     None => None,
                     Some(month) => match month {
                         DayOfMonth(x) => {
+                            if self.next_occurrence == None {
+                                self.next_occurrence = Some(self.date_begin.pred());
+                            }
                             let date = get_next_date_with_monthday(
                                 &self.next_occurrence.unwrap(), *x);
                             self.next_occurrence = Some(date);
