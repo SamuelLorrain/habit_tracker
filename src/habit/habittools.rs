@@ -53,38 +53,7 @@ pub enum RepeatMonth {
 #[derive(Debug)]
 pub enum HabitInfo {
     AlreadyDoneToday,
-    ToDoToday,
+    TodoToday,
     NotDueToday,
 }
-
-//pub struct HabitIterator<'a> {
-//    //habit: &'a Habit,
-//    current_date: NaiveDate,
-//
-//}
-
-//impl<'a> HabitIterator<'a> {
-//    pub fn new(habit: &Habit) -> Self {
-//        HabitIterator<'a> {
-//            habit,
-//            current_date: habit.date_begin
-//        }
-//    }
-//}
-
-//impl Iterator for HabitIterator<'_> {
-//    type Item = NaiveDate;
-//
-//    fn next(&mut self) -> Option<Self::Item> {
-//    }
-//}
-
-//#[derive(Debug)]
-//pub struct RepeatHabit {
-//    end_type: EndRepeatType,
-//    time_unit: RepeatTimeUnit,
-//    time: usize,
-//    weekdays: Option<Vec<Weekday>>,
-//    repeat_month: Option<RepeatMonth>
-//}
 

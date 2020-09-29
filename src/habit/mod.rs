@@ -8,6 +8,7 @@ use datetools::*;
 use crate::habit::EndRepeatType::*;
 use crate::habit::RepeatTimeUnit::*;
 use crate::habit::RepeatMonth::*;
+use crate::habit::HabitInfo::*;
 
 #[derive(Debug)]
 pub struct Habit {
@@ -139,6 +140,19 @@ impl Habit {
             weekdays: self.weekdays.clone(),
             repeat_month: self.repeat_month.clone(),
             next_occurrence: None
+        }
+    }
+
+    pub fn todo_today(&self) -> HabitInfo {
+        let today = Utc::now().naive_utc().date();
+        for x in self.history.iter().map(|x| x.datetime_done().date()) {
+            if x == today {
+                return AlreadyDoneToday;
+            }
+        }
+        match self.date_iter().next() {
+            Some(x) if x == today => TodoToday,
+            _ => NotDueToday,
         }
     }
 }

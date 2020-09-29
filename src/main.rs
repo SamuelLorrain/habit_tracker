@@ -45,6 +45,7 @@ fn main() {
 
     //println!("{:?}", h.todo_today());
 
+    println!("{:?}", h.todo_today());
     println!("{:?}", h_iter.next().unwrap());
     println!("{:?}", h_iter.next().unwrap());
     println!("{:?}", h_iter.next().unwrap());
