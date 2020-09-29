@@ -44,4 +44,20 @@ fn main() {
     //println!("{:?}", h.todo_today());
 
     println!("{:?}", h.todo_today());
+    h.done(None).expect("Error can't be done");
+    println!("{:?}", h.todo_today());
+    println!("{:?}", h.history());
+
+    let mut h_iter = h.limit_date_iter();
+
+    println!("{:?}", h_iter.next());
+    println!("{:?}", h_iter.next());
+    println!("{:?}", h_iter.next());
+    println!("{:?}", h_iter.next());
+    println!("{:?}", h_iter.next());
+    println!("{:?}", h_iter.next());
+    println!("{:?}", h_iter.next());
+    println!("{:?}", h_iter.next());
+    println!("{:?}", h_iter.next());
+    println!("{:?}", h_iter.next());
 }

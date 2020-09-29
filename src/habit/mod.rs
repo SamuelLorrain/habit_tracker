@@ -143,6 +143,14 @@ impl Habit {
         }
     }
 
+    pub fn limit_date_iter(&self) -> HabitLimitsDateIter {
+        HabitLimitsDateIter {
+            habit_date_iter: self.date_iter(),
+            end_type: self.end_type.clone(),
+            occurrences: 0
+        }
+    }
+
     pub fn todo_today(&self) -> HabitInfo {
         let today = Utc::now().naive_utc().date();
         for x in self.history.iter().map(|x| x.datetime_done().date()) {
@@ -150,7 +158,7 @@ impl Habit {
                 return AlreadyDoneToday;
             }
         }
-        match self.date_iter().next() {
+        match self.limit_date_iter().next() {
             Some(x) if x == today => TodoToday,
             _ => NotDueToday,
         }
@@ -257,6 +265,36 @@ impl Iterator for HabitDateIter {
                 }
             },
             _ => None
+        }
+    }
+}
+
+pub struct HabitLimitsDateIter {
+    habit_date_iter: HabitDateIter,
+    end_type: EndRepeatType,
+    occurrences: usize
+}
+
+impl Iterator for HabitLimitsDateIter {
+    type Item = NaiveDate;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.end_type {
+            Never => self.habit_date_iter.next(),
+            AfterOccurrences(x) => {
+                if self.occurrences < x {
+                    self.occurrences += 1;
+                    return self.habit_date_iter.next();
+                }
+                None
+            },
+            On(date) => {
+                match self.habit_date_iter.next_occurrence {
+                    None => self.habit_date_iter.next(),
+                    Some(x) if x <= date => self.habit_date_iter.next(),
+                    _ => None
+                }
+            }
         }
     }
 }
