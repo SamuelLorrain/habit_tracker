@@ -24,6 +24,7 @@ name = "habit_tracker"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "num-traits",
 ]
 
 [[package]]

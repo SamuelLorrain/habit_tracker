@@ -1,7 +1,9 @@
 pub mod habit;
 
-use chrono::{DateTime, FixedOffset, Utc, Duration};
+use chrono::{DateTime, FixedOffset, Utc, Weekday};
 use habit::{Habit};
+
+use habit::habittools::*;
 
 #[derive(Debug)]
 struct Sprint {
@@ -13,15 +15,35 @@ struct Sprint {
 }
 
 fn main() {
-    let date = Utc::now().naive_utc().date();
-    let new_date = date.succ();
-    let week = Duration::weeks(4);
-    let new_date_plus_one_week = new_date + week;
-    let h = Habit::default();
+    let mut h = Habit::default();
 
-    println!("{}", date);
-    println!("{}", new_date);
-    println!("{}", new_date_plus_one_week);
-    println!("{}", date.format("%Y-%m-%d %B %A"));
-    println!("{:?}", h);
+    h.set_name("Do sports");
+    h.set_metadata(&Some(String::from("Test")));
+    h.set_metadata(&None);
+    h.set_date_begin(&Utc::now().naive_utc().date());
+    h.set_time_habit(&Some(Utc::now().naive_utc().time()));
+    h.set_end_type(&EndRepeatType::AfterOccurrences(5));
+
+    //week
+    h.set_time_unit(&RepeatTimeUnit::Weeks);
+    h.set_weekdays(&Some(vec![Weekday::Mon, Weekday::Fri]));
+
+    //month
+    h.set_time_unit(&RepeatTimeUnit::Months);
+    //h.set_repeat_month(&Some(RepeatMonth::DayOfMonth(5)));
+    h.set_repeat_month(&Some(RepeatMonth::DayOfWeek(2, Weekday::Thu)));
+
+    //day
+    //h.set_time_unit(&RepeatTimeUnit::Days);
+    //h.set_time_repeat(2);
+    h.show();
+
+    //h.push_history(&Utc::now().naive_utc(), &None);
+    //println!("{:?}", h.history().last());
+
+    println!("{:?}", h.next().unwrap());
+    println!("{:?}", h.next().unwrap());
+    println!("{:?}", h.next().unwrap());
+    println!("{:?}", h.next().unwrap());
+    println!("{:?}", h.next().unwrap());
 }
