@@ -131,7 +131,7 @@ impl Habit {
         }
     }
 
-    pub fn date_iter(&self) -> HabitDateIter {
+    fn date_iter(&self) -> HabitDateIter {
         HabitDateIter {
             date_begin: self.date_begin.clone(),
             time_unit: self.time_unit.clone(),

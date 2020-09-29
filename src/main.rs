@@ -38,7 +38,6 @@ fn main() {
     //h.set_time_repeat(2);
     h.show();
 
-    let mut h_iter = h.date_iter();
 
     //h.push_history(&Utc::now().naive_utc(), &None);
     //println!("{:?}", h.history().last());
@@ -46,9 +45,4 @@ fn main() {
     //println!("{:?}", h.todo_today());
 
     println!("{:?}", h.todo_today());
-    println!("{:?}", h_iter.next().unwrap());
-    println!("{:?}", h_iter.next().unwrap());
-    println!("{:?}", h_iter.next().unwrap());
-    println!("{:?}", h_iter.next().unwrap());
-    println!("{:?}", h_iter.next().unwrap());
 }
