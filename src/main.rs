@@ -54,4 +54,8 @@ fn main() {
     }
 
     println!("{:?}", h.next_time());
+
+    let serialized = serde_json::to_string(&h).unwrap();
+
+    println!("{}", serialized);
 }
