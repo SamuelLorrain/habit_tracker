@@ -50,7 +50,7 @@ pub enum RepeatMonth {
     DayOfWeek(usize, Weekday)
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum HabitInfo {
     AlreadyDoneToday,
     TodoToday,

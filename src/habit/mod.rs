@@ -151,16 +151,35 @@ impl Habit {
         }
     }
 
+    pub fn has_missing_iter(&self) -> HabitHasMissingIter {
+        HabitHasMissingIter {
+            habit_limits_date_iter: self.limit_date_iter(),
+            history: self.history.clone()
+        }
+    }
+
     pub fn todo_today(&self) -> HabitInfo {
         let today = Utc::now().naive_utc().date();
-        for x in self.history.iter().map(|x| x.datetime_done().date()) {
-            if x == today {
+        // already done
+        for x in self.history.iter() {
+            if x.datetime_done().date() == today {
                 return AlreadyDoneToday;
             }
         }
-        match self.limit_date_iter().next() {
-            Some(x) if x == today => TodoToday,
-            _ => NotDueToday,
+        let mut date_iter = self.limit_date_iter();
+        loop {
+            let date = date_iter.next();
+            match date {
+                Some(x) => {
+                    if x == today {
+                        return TodoToday;
+                    }
+                    if x > today {
+                        return NotDueToday;
+                    }
+                },
+                _ => { return NotDueToday; }
+            }
         }
     }
 
@@ -175,6 +194,20 @@ impl Habit {
             }
             x => Err(x)
         }
+    }
+
+    pub fn next_time(&self) -> Option<NaiveDate> {
+        let today = Utc::now().naive_utc().date();
+        if self.todo_today() == TodoToday {
+            return Some(today);
+        }
+        let date_iter = self.limit_date_iter();
+        for x in date_iter {
+            if x > today {
+                return Some(x);
+            }
+        }
+        None
     }
 }
 
@@ -201,6 +234,7 @@ impl Default for Habit {
     }
 }
 
+#[derive(Debug)]
 pub struct HabitDateIter {
     date_begin: NaiveDate,
     time_unit: RepeatTimeUnit,
@@ -269,6 +303,7 @@ impl Iterator for HabitDateIter {
     }
 }
 
+#[derive(Debug)]
 pub struct HabitLimitsDateIter {
     habit_date_iter: HabitDateIter,
     end_type: EndRepeatType,
@@ -294,6 +329,32 @@ impl Iterator for HabitLimitsDateIter {
                     Some(x) if x <= date => self.habit_date_iter.next(),
                     _ => None
                 }
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct HabitHasMissingIter {
+    pub habit_limits_date_iter: HabitLimitsDateIter,
+    pub history: Vec<HabitHistoryItem>,
+}
+
+impl Iterator for HabitHasMissingIter {
+    type Item = NaiveDate;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let today = Utc::now().naive_utc().date();
+        match self.habit_limits_date_iter.next() {
+            None => None,
+            Some(date) if date > today => None,
+            Some(date) => {
+                for x in self.history.iter() {
+                    if x.datetime_done().date() == date {
+                        return None;
+                    }
+                }
+                return Some(date);
             }
         }
     }
