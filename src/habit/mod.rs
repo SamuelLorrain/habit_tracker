@@ -10,7 +10,9 @@ use crate::habit::RepeatTimeUnit::*;
 use crate::habit::RepeatMonth::*;
 use crate::habit::HabitInfo::*;
 
-#[derive(Debug)]
+use serde::{Serialize, Deserialize};
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Habit {
     name: String,
     metadata: Option<String>,

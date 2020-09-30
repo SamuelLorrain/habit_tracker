@@ -1,6 +1,7 @@
 use chrono::{NaiveDate, NaiveDateTime, Weekday};
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HabitHistoryItem {
     datetime_done: NaiveDateTime,
     metadata: Option<String>,
@@ -29,14 +30,14 @@ impl HabitHistoryItem {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum EndRepeatType {
     Never,
     On(NaiveDate),
     AfterOccurrences(usize)
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum RepeatTimeUnit {
     Days,
     Weeks,
@@ -44,13 +45,13 @@ pub enum RepeatTimeUnit {
     Years
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum RepeatMonth {
     DayOfMonth(usize),
     DayOfWeek(usize, Weekday)
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum HabitInfo {
     AlreadyDoneToday,
     TodoToday,

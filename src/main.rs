@@ -25,8 +25,8 @@ fn main() {
     h.set_end_type(&EndRepeatType::AfterOccurrences(5));
 
     //week
-    //h.set_time_unit(&RepeatTimeUnit::Weeks);
-    //h.set_weekdays(&Some(vec![Weekday::Tue, Weekday::Fri]));
+    h.set_time_unit(&RepeatTimeUnit::Weeks);
+    h.set_weekdays(&Some(vec![Weekday::Tue, Weekday::Fri]));
 
     //month
     //h.set_time_unit(&RepeatTimeUnit::Months);
@@ -34,8 +34,8 @@ fn main() {
     //h.set_repeat_month(&Some(RepeatMonth::DayOfWeek(2, Weekday::Thu)));
 
     //day
-    h.set_time_unit(&RepeatTimeUnit::Days);
-    h.set_time_repeat(2);
+    //h.set_time_unit(&RepeatTimeUnit::Days);
+    h.set_time_repeat(1);
     h.show();
 
     //h.push_history(&Utc::now().naive_utc(), &None);
