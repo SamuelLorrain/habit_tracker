@@ -6,6 +6,10 @@ use std::fs;
 use std::io::BufReader;
 use std::io::Error;
 use std::io::prelude::*;
+use std::env;
+use std::collections::HashMap;
+use regex::Regex;
+use habit::habittools::*;
 
 #[derive(Debug)]
 struct Sprint {
@@ -51,8 +55,65 @@ pub fn save_database(database: Vec<Habit>, database_path: &str) -> Result<(), Er
     file.write_all(serialized.as_bytes())
 }
 
+pub fn handle_args() -> HashMap<&'static str, bool> {
+    let mut options: HashMap<&str, bool> = HashMap::new();
+
+    let args : Vec<_> =  env::args().collect();
+    let mut i = 1;
+    while i < args.len() {
+        if Regex::new(r"^--list$").unwrap().is_match(&args[i]) {
+            options.insert("LIST", true);
+        }
+        else if Regex::new(r"--today$").unwrap().is_match(&args[i]) {
+            options.insert("TODAY", true);
+        }
+        i+=1;
+    }
+
+    options
+}
+
+pub fn printdb(db: &[Habit]) {
+    println!("============");
+    for x in db.iter() {
+        x.show();
+        println!("============");
+    }
+}
+
+pub fn printdb_today(db: &[Habit]) {
+    println!("Today, you must do :");
+    println!("============");
+    for x in db.iter() {
+        if x.todo_today() == HabitInfo::TodoToday {
+            x.show();
+        }
+        println!("============");
+    }
+}
+
 fn main() {
     const FILE_NAME: &str = "habit_database.json";
+    let options = handle_args();
+
+    let mut db = open_database(FILE_NAME);
+
+    //let h = Habit::default();
+    //db.push(h);
+    //println!("{:?}", db);
+
+
+    match options.get(&"LIST") {
+        Some(_) => printdb(db.as_slice()),
+        _ => ()
+    }
+    match options.get(&"TODAY") {
+        Some(_) => printdb_today(db.as_slice()),
+        _ => ()
+    }
+
+    //save_database(db, FILE_NAME)
+    //    .expect("Unable to save database");
 
     //let mut h = Habit::default();
 
@@ -84,12 +145,4 @@ fn main() {
     //println!("{:?}", h.history());
     //println!("{:?}", h.next_time());
 
-    let mut db = open_database(FILE_NAME);
-
-    let h = Habit::default();
-    db.push(h);
-    println!("{:?}", db);
-
-    save_database(db, FILE_NAME)
-        .expect("Unable to save database");
 }
