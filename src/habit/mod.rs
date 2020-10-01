@@ -80,6 +80,7 @@ impl Habit {
     }
 }
 
+// business
 impl Habit {
     pub fn show(&self) {
         println!("name: {}", self.name);
