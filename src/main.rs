@@ -55,18 +55,44 @@ pub fn save_database(database: Vec<Habit>, database_path: &str) -> Result<(), Er
     file.write_all(serialized.as_bytes())
 }
 
-pub fn handle_args() -> HashMap<&'static str, bool> {
-    let mut options: HashMap<&str, bool> = HashMap::new();
+pub enum Either<A,B> {
+    Left(A),
+    Right(B)
+}
+
+pub fn handle_args() -> HashMap<&'static str, Either<bool, String>> {
+    let mut options: HashMap<&str, Either<bool, String>> = HashMap::new();
 
     let args : Vec<_> =  env::args().collect();
     let mut i = 1;
     while i < args.len() {
         if Regex::new(r"^--list$").unwrap().is_match(&args[i]) {
-            options.insert("LIST", true);
+            options.insert("LIST", Either::Left(true));
         }
-        else if Regex::new(r"--today$").unwrap().is_match(&args[i]) {
-            options.insert("TODAY", true);
+        else if Regex::new(r"^--today$").unwrap().is_match(&args[i]) {
+            options.insert("TODAY", Either::Left(true));
         }
+        else if Regex::new(r"^--done$").unwrap().is_match(&args[i]) {
+            if i+1 < args.len() {
+                panic!("Missing --done argument: name of the habit");
+            }
+            let name = &args[i+1];
+            options.insert("DONE", Either::Right(name.to_string()));
+            i+= 1;
+        }
+        else if Regex::new(r"^--new$").unwrap().is_match(&args[i]) {
+            if i+1 < args.len() {
+                panic!("Missing --new argument: name of the habit");
+            }
+            let name = &args[i+1];
+            options.insert("NEW", Either::Right(name.to_string()));
+            i+= 1;
+        }
+        else if Regex::new(r"^--help$").unwrap().is_match(&args[i]) {
+            options.insert("HELP", Either::Left(true));
+            i+= 1;
+        }
+
         i+=1;
     }
 
@@ -92,6 +118,27 @@ pub fn printdb_today(db: &[Habit]) {
     }
 }
 
+pub fn print_help() {
+    print!(
+       "habit_tracker\n\
+        A simple habit tracker with stats\n\n\
+        USAGE:\n\
+        \thabit_tracker [OPTIONS]\n\n\
+        OPTIONS:\n\
+        \t--list                                     List all current habits\n\
+        \t--today                                    List all habits todo today\n\
+        \t--done <NAME>                              Mark a habit has done (if it is due today)\n\
+        \t--new <NAME>                               Create a new habit\n\
+        \t--freq <NAME> <FREQ> <FREQ_UNIT> [OPTIONS] Change frequency of the habit\n\
+        \t--time <NAME> <TIME>                       Change time of the habit\n\
+        \t--date <NAME> <TIME>                       Change begin date of the habit (default: today)\n\
+        \t--end  <NAME> <TIME> <TIME_TYPE>           Add endtime for the habit\n\
+        \t--meta <NAME> <META>                       Add metadata to the habit\n\n\
+        \t--missing <NAME>                           List every day the habit has been missed\n\
+        "
+    );
+}
+
 fn main() {
     const FILE_NAME: &str = "habit_database.json";
     let options = handle_args();
@@ -103,6 +150,13 @@ fn main() {
     //println!("{:?}", db);
 
 
+    match options.get(&"HELP") {
+        Some(_) => {
+            print_help();
+            ()
+        },
+        _ => ()
+    }
     match options.get(&"LIST") {
         Some(_) => printdb(db.as_slice()),
         _ => ()
