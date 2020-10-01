@@ -1,10 +1,7 @@
 pub mod habit;
 
-use chrono::{DateTime, FixedOffset, Utc, Weekday};
+use chrono::{DateTime, FixedOffset};
 use habit::{Habit};
-use habit::habittools::*;
-use serde::{Serialize, Deserialize};
-use std::env;
 use std::fs;
 use std::io::BufReader;
 use std::io::Error;
