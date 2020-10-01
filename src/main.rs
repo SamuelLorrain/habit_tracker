@@ -2,12 +2,13 @@ pub mod habit;
 
 use chrono::{DateTime, FixedOffset, Utc, Weekday};
 use habit::{Habit};
-
 use habit::habittools::*;
-
+use serde::{Serialize, Deserialize};
+use std::env;
 use std::fs;
 use std::io::BufReader;
-use serde::{Serialize, Deserialize};
+use std::io::Error;
+use std::io::prelude::*;
 
 #[derive(Debug)]
 struct Sprint {
@@ -18,8 +19,44 @@ struct Sprint {
     metadata: Option<String>
 }
 
+pub fn open_database(database_path: &str) -> Vec<Habit> {
+    let file = match fs::File::open(database_path) {
+        Ok(f) => f,
+        Err(err) => {
+            eprintln!("{}, creating new database", err);
+            let mut new_db = fs::File::create(database_path)
+                .expect("Unable to create database");
+            let db_vector : Vec<Habit> = Vec::new();
+            let serialized = serde_json::to_string(&db_vector)
+                .expect("Unable to create database (serde_json error)");
+            new_db.write_all(serialized.as_bytes())
+                .expect("Unable to write in the new created file");
+            new_db
+        }
+    };
+
+    let reader = BufReader::new(file);
+
+    let array: Vec<Habit> = serde_json::from_reader(reader)
+        .expect("error from reader");
+
+    array
+}
+
+pub fn save_database(database: Vec<Habit>, database_path: &str) -> Result<(), Error> {
+    let mut file = fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open(database_path)
+        .expect("File doesn't exist");
+    let serialized = serde_json::to_string(&database)
+        .expect("Unable to store create database, not a valid database");
+    file.write_all(serialized.as_bytes())
+}
+
 fn main() {
     const FILE_NAME: &str = "habit_database.json";
+
     //let mut h = Habit::default();
 
     //h.set_name("Do sports");
@@ -47,34 +84,15 @@ fn main() {
     //println!("{:?}", h.history().last());
 
     //println!("{:?}", h.todo_today());
-
-    //println!("{:?}", h.todo_today());
-    ////h.done(None).expect("Error can't be done");
     //println!("{:?}", h.history());
-
-    //let h_iter = h.limit_date_iter();
-
-    //for x in h_iter {
-    //    println!("{:?}", x);
-    //}
-
     //println!("{:?}", h.next_time());
 
-    //let serialized = serde_json::to_string(&h).unwrap();
+    let mut db = open_database(FILE_NAME);
 
-    //let mut file = fs::File::create("test_file.json")
-    //    .expect("NEE");
-    //let serialized = serialized.as_bytes();
-    //file.write_all(serialized)
-    //    .expect("Unable to write");
+    let h = Habit::default();
+    db.push(h);
+    println!("{:?}", db);
 
-    //println!("{:?}", serialized);
-    let file = fs::File::open(FILE_NAME)
-        .expect("Unable to read file");
-    let reader = BufReader::new(file);
-    let mut de = serde_json::Deserializer::from_reader(reader);
-    let h = Habit::deserialize(&mut de)
-        .expect("The json file is not a valid habit database");
-
-    h.show();
+    save_database(db, FILE_NAME)
+        .expect("Unable to save database");
 }
