@@ -84,9 +84,45 @@ pub fn handle_args() -> HashMap<&'static str, Either<bool, String>> {
             if i+1 < args.len() {
                 panic!("Missing --new argument: name of the habit");
             }
-            let name = &args[i+1];
-            options.insert("NEW", Either::Right(name.to_string()));
+            options.insert("NEW", Either::Right(args[i+1].to_string()));
             i+= 1;
+        }
+        else if Regex::new(r"^--freq$").unwrap().is_match(&args[i]) {
+            // IMPLEMENT --freq
+            options.insert("FREQ", Either::Left(true));
+            i+= 1;
+        }
+        else if Regex::new(r"^--time$").unwrap().is_match(&args[i]) {
+            // IMPLEMENT --time
+            options.insert("TIME", Either::Left(true));
+            i+= 1;
+        }
+        else if Regex::new(r"^--begin$").unwrap().is_match(&args[i]) {
+            if i+1 < args.len() {
+                panic!("Missing --begin argument: name of the habit");
+            }
+            options.insert("BEGIN", Either::Right(args[i+1].to_string()));
+        }
+        else if Regex::new(r"^--end$").unwrap().is_match(&args[i]) {
+            // IMPLEMENT --end
+            if i+1 < args.len() {
+                panic!("Missing --end argument: name of the habit");
+            }
+            options.insert("END", Either::Right(args[i+1].to_string()));
+        }
+        else if Regex::new(r"^--meta$").unwrap().is_match(&args[i]) {
+            // IMPLEMENT --meta
+            if i+1 < args.len() {
+                panic!("Missing --meta argument: name of the habit");
+            }
+            options.insert("META", Either::Right(args[i+1].to_string()));
+        }
+        else if Regex::new(r"^--missing$").unwrap().is_match(&args[i]) {
+            // IMPLEMENT --missing
+            if i+1 < args.len() {
+                panic!("Missing --missing argument: name of the habit");
+            }
+            options.insert("MISSING", Either::Right(args[i+1].to_string()));
         }
         else if Regex::new(r"^--help$").unwrap().is_match(&args[i]) {
             options.insert("HELP", Either::Left(true));
@@ -118,6 +154,12 @@ pub fn printdb_today(db: &[Habit]) {
     }
 }
 
+pub fn new_habit_in_db(db: &mut Vec<Habit>, newHabit: &str) {
+    let mut h = Habit::default();
+    h.set_name(newHabit);
+    db.push(h);
+}
+
 pub fn print_help() {
     print!(
        "habit_tracker\n\
@@ -131,10 +173,11 @@ pub fn print_help() {
         \t--new <NAME>                               Create a new habit\n\
         \t--freq <NAME> <FREQ> <FREQ_UNIT> [OPTIONS] Change frequency of the habit\n\
         \t--time <NAME> <TIME>                       Change time of the habit\n\
-        \t--date <NAME> <TIME>                       Change begin date of the habit (default: today)\n\
-        \t--end  <NAME> <TIME> <TIME_TYPE>           Add endtime for the habit\n\
-        \t--meta <NAME> <META>                       Add metadata to the habit\n\n\
-        \t--missing <NAME>                           List every day the habit has been missed\n\
+        \t--begin <NAME> <DATE>                      Change begin date of the habit (default: today)\n\
+        \t--end  <NAME> <TIME> <TIME_TYPE>           Add endtime for the habit (default: none)\n\
+        \t--meta <NAME> <META>                       Add metadata to the habit\n\
+        \t--missing <NAME>                           List every day the habit has been missed\n\n\
+        \t--help                                     Show help\n\
         "
     );
 }
@@ -163,6 +206,10 @@ fn main() {
     }
     match options.get(&"TODAY") {
         Some(_) => printdb_today(db.as_slice()),
+        _ => ()
+    }
+    match options.get(&"NEW") {
+        Some(Either::Right(name)) => new_habit_in_db(&mut db, &name.to_string()),
         _ => ()
     }
 
