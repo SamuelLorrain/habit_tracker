@@ -54,3 +54,16 @@ pub fn get_next_date_with_monthday(date: &NaiveDate, month_day: usize) -> NaiveD
     }
     return next_date;
 }
+
+pub fn parse_weekday(day: &str) -> Result<Weekday, &str> {
+    match day.to_lowercase().as_ref() {
+        "mon" | "monday"    => Ok(Weekday::Mon),
+        "tue" | "tuesday"   => Ok(Weekday::Tue),
+        "wed" | "wednesday" => Ok(Weekday::Wed),
+        "thu" | "thursday"  => Ok(Weekday::Thu),
+        "fri" | "friday"    => Ok(Weekday::Fri),
+        "sat" | "saturday"  => Ok(Weekday::Sat),
+        "sun" | "sunday"    => Ok(Weekday::Sun),
+        _ => Err("String is not a day")
+    }
+}

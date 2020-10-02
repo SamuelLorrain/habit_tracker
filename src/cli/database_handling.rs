@@ -1,4 +1,5 @@
 use crate::habit::habittools::*;
+use crate::habit::datetools::{parse_weekday};
 use crate::habit::{Habit};
 use std::io::BufReader;
 use std::io::Error;
@@ -54,8 +55,8 @@ pub fn printdb_today(db: &[Habit]) {
     for x in db.iter() {
         if x.todo_today() == HabitInfo::TodoToday {
             x.show();
+            println!("============");
         }
-        println!("============");
     }
 }
 
@@ -151,10 +152,48 @@ pub fn end_habit_in_db(db: &mut Vec<Habit>,
     }
 }
 
-//pub fn freq_habit_in_db(db: &mut Vec<Habit>,
-//                       habit_name: &str,
-//                       frequency: &str,
-//                       frequency_unit: &str,
-//                       options: Option<Vec<String>>) {
-//
-//}
+pub fn freq_habit_in_db(db: &mut Vec<Habit>,
+                       habit_name: &str,
+                       frequency: &str,
+                       frequency_unit: &str,
+                       options: Option<Vec<String>>) {
+    for x in db {
+        if x.name() == habit_name {
+            let time_repeat : usize = frequency.parse()
+                .expect("Error the frequency provided is not a number");
+            x.set_time_repeat(time_repeat);
+            let time_unit = match frequency_unit {
+                "days"   => RepeatTimeUnit::Days,
+                "weeks"  => RepeatTimeUnit::Weeks,
+                "months" => RepeatTimeUnit::Months,
+                "years"  => RepeatTimeUnit::Years,
+                _        => panic!("Bad frequency unit entered")
+            };
+            x.set_time_unit(&time_unit);
+            match &options {
+                Some(weeks_str_vec) if time_unit == RepeatTimeUnit::Weeks => {
+                    let weeks = weeks_str_vec.iter().map(|x| parse_weekday(x).unwrap()).collect();
+                    x.set_weekdays(&Some(weeks));
+                },
+                Some(months_str_vec) if time_unit == RepeatTimeUnit::Months => {
+                    let month_type = &months_str_vec[0];
+                    match month_type.as_ref() {
+                        "day_of_month" => {
+                            let day_of_month: usize = months_str_vec[1].parse().unwrap();
+                            x.set_repeat_month(
+                                &Some(RepeatMonth::DayOfMonth(day_of_month)));
+                        },
+                        "day_of_week" => {
+                            let day_of_week: usize = months_str_vec[1].parse().unwrap();
+                            x.set_repeat_month(
+                                &Some(RepeatMonth::DayOfWeek(
+                                        day_of_week, parse_weekday(&months_str_vec[2]).unwrap())));
+                        }
+                        _ => panic!("Bad repeat frequency type entered")
+                    }
+                }
+                _ => (),
+            }
+        }
+    }
+}

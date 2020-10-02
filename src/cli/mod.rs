@@ -23,7 +23,7 @@ pub fn print_help() {
         \t--today                                    List all habits todo today\n\
         \t--done <NAME>                              Mark a habit has done (if it is due today)\n\
         \t--new <NAME>                               Create a new habit\n\
-        \tx --freq <NAME> <FREQ> <FREQ_UNIT> [OPTIONS] Change frequency of the habit\n\
+        \t--freq <NAME> <FREQ> <FREQ_UNIT> [OPTIONS] Change frequency of the habit\n\
         \t--time <NAME> <TIME>                       Change time of the habit\n\
         \t--begin <NAME> <DATE>                      Change begin date of the habit (default: today)\n\
         \t--end  <NAME> <TIME> <TIME_TYPE>           Add endtime for the habit (default: none)\n\
@@ -62,9 +62,15 @@ pub fn handle_args() -> HashMap<&'static str, ArgumentTypes<bool, String, Vec<St
             i+= 1;
         }
         else if Regex::new(r"^--freq$").unwrap().is_match(&args[i]) {
-            // IMPLEMENT --freq
-            options.insert("FREQ", ArgumentTypes::TypeA(true));
-            i+= 1;
+            if i+3 >= args.len() {
+                panic!("Missing --freq argument");
+            }
+            let mut infos = vec![];
+            for x in args[i+1..].iter() {
+                infos.push(x.clone());
+            }
+            options.insert("FREQ", ArgumentTypes::TypeC(infos));
+            i += args.len();
         }
         else if Regex::new(r"^--time$").unwrap().is_match(&args[i]) {
             if i+2 >= args.len() {
@@ -142,6 +148,36 @@ pub fn handle_cli() {
     match options.get(&"NEW") {
         Some(ArgumentTypes::TypeB(name)) => {
             new_habit_in_db(&mut db, &name.to_string());
+            save_database(&db, FILE_NAME)
+                .expect("Unable to save database");
+        },
+        _ => ()
+    }
+    match options.get(&"FREQ") {
+        Some(ArgumentTypes::TypeC(data)) => {
+            let mut vector_options: Vec<String> = vec![];
+            if data.len() > 2 {
+                for x in data[3..].iter() {
+                    vector_options.push(x.to_string());
+                }
+            }
+            if vector_options.len() == 0 {
+                freq_habit_in_db(
+                    &mut db,
+                    &data[0],
+                    &data[1],
+                    &data[2],
+                    Some(vector_options)
+                );
+            } else {
+                freq_habit_in_db(
+                    &mut db,
+                    &data[0],
+                    &data[1],
+                    &data[2],
+                    None
+                );
+            }
             save_database(&db, FILE_NAME)
                 .expect("Unable to save database");
         },
