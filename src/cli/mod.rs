@@ -24,9 +24,9 @@ pub fn print_help() {
         \t--done <NAME>                              Mark a habit has done (if it is due today)\n\
         \t--new <NAME>                               Create a new habit\n\
         \tx --freq <NAME> <FREQ> <FREQ_UNIT> [OPTIONS] Change frequency of the habit\n\
-        \tx --time <NAME> <TIME>                       Change time of the habit\n\
-        \tx --begin <NAME> <DATE>                      Change begin date of the habit (default: today)\n\
-        \tx --end  <NAME> <TIME> <TIME_TYPE>           Add endtime for the habit (default: none)\n\
+        \t--time <NAME> <TIME>                       Change time of the habit\n\
+        \t--begin <NAME> <DATE>                      Change begin date of the habit (default: today)\n\
+        \t--end  <NAME> <TIME> <TIME_TYPE>           Add endtime for the habit (default: none)\n\
         \t--meta <NAME> <META>                       Add metadata to the habit\n\
         \t--missing <NAME>                           List every day the habit has been missed\n\n\
         \t--help                                     Show help\n\
@@ -47,7 +47,7 @@ pub fn handle_args() -> HashMap<&'static str, ArgumentTypes<bool, String, Vec<St
             options.insert("TODAY", ArgumentTypes::TypeA(true));
         }
         else if Regex::new(r"^--done$").unwrap().is_match(&args[i]) {
-            if i+1 < args.len() {
+            if i+1 >= args.len() {
                 panic!("Missing --done argument: name of the habit");
             }
             let name = &args[i+1];
@@ -55,7 +55,7 @@ pub fn handle_args() -> HashMap<&'static str, ArgumentTypes<bool, String, Vec<St
             i+= 1;
         }
         else if Regex::new(r"^--new$").unwrap().is_match(&args[i]) {
-            if i+1 < args.len() {
+            if i+1 >= args.len() {
                 panic!("Missing --new argument: name of the habit");
             }
             options.insert("NEW", ArgumentTypes::TypeB(args[i+1].to_string()));
@@ -67,26 +67,33 @@ pub fn handle_args() -> HashMap<&'static str, ArgumentTypes<bool, String, Vec<St
             i+= 1;
         }
         else if Regex::new(r"^--time$").unwrap().is_match(&args[i]) {
-            // IMPLEMENT --time
-            options.insert("TIME", ArgumentTypes::TypeA(true));
-            i+= 1;
+            if i+2 >= args.len() {
+                panic!("Missing --time argument: <name> <time>");
+            }
+            let time_args = vec![args[i+1].to_string(), args[i+2].to_string()];
+            options.insert("TIME", ArgumentTypes::TypeC(time_args));
+            i+= 2;
         }
         else if Regex::new(r"^--begin$").unwrap().is_match(&args[i]) {
-            if i+1 < args.len() {
+            if i+2 >= args.len() {
                 panic!("Missing --begin argument: name of the habit");
             }
-            options.insert("BEGIN", ArgumentTypes::TypeB(args[i+1].to_string()));
-            i+=1
+            let begin_args = vec![args[i+1].to_string(), args[i+2].to_string()];
+            options.insert("BEGIN", ArgumentTypes::TypeC(begin_args));
+            i+= 2;
         }
         else if Regex::new(r"^--end$").unwrap().is_match(&args[i]) {
-            // IMPLEMENT --end
-            if i+1 < args.len() {
-                panic!("Missing --end argument: name of the habit");
+            if i+3 >= args.len() {
+                panic!("Missing --end argument: <name> <time> <time_type>");
             }
-            options.insert("END", ArgumentTypes::TypeB(args[i+1].to_string()));
+            let end_args = vec![args[i+1].to_string(),
+                                args[i+2].to_string(),
+                                args[i+3].to_string()];
+            options.insert("END", ArgumentTypes::TypeC(end_args));
+            i+=3;
         }
         else if Regex::new(r"^--meta$").unwrap().is_match(&args[i]) {
-            if i+2 < args.len() {
+            if i+2 >= args.len() {
                 panic!("Missing --meta argument: name of the habit");
             }
             let meta_args = vec![args[i+1].to_string(), args[i+2].to_string()];
@@ -94,7 +101,7 @@ pub fn handle_args() -> HashMap<&'static str, ArgumentTypes<bool, String, Vec<St
             i+= 2;
         }
         else if Regex::new(r"^--missing$").unwrap().is_match(&args[i]) {
-            if i+1 < args.len() {
+            if i+1 >= args.len() {
                 panic!("Missing --missing argument: name of the habit");
             }
             options.insert("MISSING", ArgumentTypes::TypeB(args[i+1].to_string()));
@@ -135,6 +142,30 @@ pub fn handle_cli() {
     match options.get(&"NEW") {
         Some(ArgumentTypes::TypeB(name)) => {
             new_habit_in_db(&mut db, &name.to_string());
+            save_database(&db, FILE_NAME)
+                .expect("Unable to save database");
+        },
+        _ => ()
+    }
+    match options.get(&"TIME") {
+        Some(ArgumentTypes::TypeC(data)) => {
+            time_habit_in_db(&mut db, &data[0], &data[1]);
+            save_database(&db, FILE_NAME)
+                .expect("Unable to save database");
+        },
+        _ => ()
+    }
+    match options.get(&"BEGIN") {
+        Some(ArgumentTypes::TypeC(data)) => {
+            begin_habit_in_db(&mut db, &data[0], &data[1]);
+            save_database(&db, FILE_NAME)
+                .expect("Unable to save database");
+        },
+        _ => ()
+    }
+    match options.get(&"END") {
+        Some(ArgumentTypes::TypeC(data)) => {
+            end_habit_in_db(&mut db, &data[0], &data[1], &data[2]);
             save_database(&db, FILE_NAME)
                 .expect("Unable to save database");
         },

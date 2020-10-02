@@ -132,6 +132,12 @@ impl Habit {
                 }
             }
         }
+
+        match self.todo_today() {
+            AlreadyDoneToday => println!("The habit have been done today"),
+            TodoToday => println!("The habit must be done today"),
+            _ => ()
+        }
     }
 
     fn date_iter(&self) -> HabitDateIter {

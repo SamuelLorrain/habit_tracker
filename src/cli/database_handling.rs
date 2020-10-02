@@ -83,6 +83,7 @@ pub fn missing_habit_in_db(db: &mut Vec<Habit>, habit_name: &str) {
     for x in db {
         if x.name() == habit_name {
             let iter = x.has_missing_iter();
+            println!("You have missed the following days for `{}` :", habit_name);
             for y in iter {
                 println!("{}", y);
             }
@@ -98,3 +99,62 @@ pub fn meta_habit_in_db(db: &mut Vec<Habit>, habit_name: &str, meta: &str) {
     }
 }
 
+pub fn time_habit_in_db(db: &mut Vec<Habit>, habit_name: &str, time: &str) {
+    for x in db {
+        if x.name() == habit_name {
+            let time_parsed = chrono::NaiveTime::parse_from_str(time, "%H:%M:%S")
+                .expect("Unable to parse time");
+            x.set_time_habit(&Some(time_parsed));
+        }
+    }
+}
+
+pub fn begin_habit_in_db(db: &mut Vec<Habit>, habit_name: &str, date_begin: &str) {
+    for x in db {
+        if x.name() == habit_name {
+            let date_begin_parsed = chrono::NaiveDate::parse_from_str(date_begin, "%Y-%m-%d")
+                .expect("Unable to parse date");
+            x.set_date_begin(&date_begin_parsed);
+        }
+    }
+}
+
+pub fn end_habit_in_db(db: &mut Vec<Habit>,
+                       habit_name: &str,
+                       time_or_occurrence: &str,
+                       end_type: &str) {
+
+    if end_type.to_lowercase() == "never" {
+        for x in db {
+            if x.name() == habit_name {
+                x.set_end_type(&EndRepeatType::Never);
+            }
+        }
+    }
+    else if end_type.to_lowercase() == "after_occurrences" {
+        let time : usize = time_or_occurrence.parse()
+            .expect("Error time could not be parsed");
+        for x in db {
+            if x.name() == habit_name {
+                x.set_end_type(&EndRepeatType::AfterOccurrences(time));
+            }
+        }
+    }
+    else if end_type.to_lowercase() == "on" {
+            let date = chrono::NaiveDate::parse_from_str(time_or_occurrence, "%Y-%m-%d")
+            .expect("Error time could not be parsed");
+        for x in db {
+            if x.name() == habit_name {
+                x.set_end_type(&EndRepeatType::On(date));
+            }
+        }
+    }
+}
+
+//pub fn freq_habit_in_db(db: &mut Vec<Habit>,
+//                       habit_name: &str,
+//                       frequency: &str,
+//                       frequency_unit: &str,
+//                       options: Option<Vec<String>>) {
+//
+//}
