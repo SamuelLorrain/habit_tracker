@@ -61,9 +61,14 @@ pub fn printdb_today(db: &[Habit]) {
 }
 
 pub fn new_habit_in_db(db: &mut Vec<Habit>, new_habit: &str) {
-    let mut h = Habit::default();
-    h.set_name(new_habit);
-    db.push(h);
+    match db.iter().position(|x| x.name() == new_habit) {
+        Some(x) => panic!("Unable to create two habit with the same name"),
+        None => {
+            let mut h = Habit::default();
+            h.set_name(new_habit);
+            db.push(h);
+        }
+    }
 }
 
 pub fn done_habit_in_db(db: &mut Vec<Habit>, habit_name: &str) {
@@ -80,7 +85,7 @@ pub fn done_habit_in_db(db: &mut Vec<Habit>, habit_name: &str) {
     }
 }
 
-pub fn missing_habit_in_db(db: &mut Vec<Habit>, habit_name: &str) {
+pub fn missing_habit_in_db(db: &Vec<Habit>, habit_name: &str) {
     for x in db {
         if x.name() == habit_name {
             let iter = x.has_missing_iter();
@@ -198,12 +203,18 @@ pub fn freq_habit_in_db(db: &mut Vec<Habit>,
     }
 }
 
-pub fn history_habit_in_db(db: &mut Vec<Habit>, habit_name: &str) {
+pub fn history_habit_in_db(db: &Vec<Habit>, habit_name: &str) {
     for x in db {
         if x.name() == habit_name {
             for y in x.history().iter() {
                 y.show();
             }
         }
+    }
+}
+
+pub fn delete_habit_from_db(db: &mut Vec<Habit>, habit_name: &str) {
+    if let Some(pos) = db.iter().position(|x| x.name() == habit_name) {
+        db.remove(pos);
     }
 }

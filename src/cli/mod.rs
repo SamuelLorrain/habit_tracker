@@ -28,6 +28,7 @@ pub fn print_help() {
         \t--begin <NAME> <DATE>                      Change begin date of the habit (default: today)\n\
         \t--end  <NAME> <TIME> <TIME_TYPE>           Add endtime for the habit (default: none)\n\
         \t--meta <NAME> <META>                       Add metadata to the habit\n\
+        \t--delete  <NAME>                           Delete habit from the database\n\
         \t--history <NAME>                           History for the given habits\n\
         \t--missing <NAME>                           List every day the habit has been missed\n\n\
         \t--help                                     Show help\n\
@@ -107,6 +108,13 @@ pub fn handle_args() -> HashMap<&'static str, ArgumentTypes<bool, String, Vec<St
             let meta_args = vec![args[i+1].to_string(), args[i+2].to_string()];
             options.insert("META", ArgumentTypes::TypeC(meta_args));
             i+= 2;
+        }
+        else if Regex::new(r"^--delete$").unwrap().is_match(&args[i]) {
+            if i+1 >= args.len() {
+                panic!("Missing --delete argument: name of the habit");
+            }
+            options.insert("DELETE", ArgumentTypes::TypeB(args[i+1].to_string()));
+            i+= 1;
         }
         else if Regex::new(r"^--history$").unwrap().is_match(&args[i]) {
             if i+1 >= args.len() {
@@ -222,9 +230,17 @@ pub fn handle_cli() {
         },
         _ => ()
     }
+    match options.get(&"DELETE") {
+        Some(ArgumentTypes::TypeB(data)) => {
+            delete_habit_from_db(&mut db, &data);
+            save_database(&db, FILE_NAME)
+                .expect("Unable to save database");
+        },
+        _ => ()
+    }
     match options.get(&"HISTORY") {
         Some(ArgumentTypes::TypeB(data)) => {
-            history_habit_in_db(&mut db, &data);
+            history_habit_in_db(&db, &data);
         },
         _ => ()
     }
@@ -237,7 +253,7 @@ pub fn handle_cli() {
         _ => ()
     }
     match options.get(&"MISSING") {
-        Some(ArgumentTypes::TypeB(name)) => missing_habit_in_db(&mut db, &name.to_string()),
+        Some(ArgumentTypes::TypeB(name)) => missing_habit_in_db(&db, &name.to_string()),
         _ => ()
     }
     match options.get(&"HELP") {
