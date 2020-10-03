@@ -120,8 +120,7 @@ impl Habit {
                 }
             }
         }
-
-        if self.time_unit == Months {
+        else if self.time_unit == Months {
             match &self.repeat_month {
                 None => (),
                 Some(month_type) => {

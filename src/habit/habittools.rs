@@ -28,6 +28,14 @@ impl HabitHistoryItem {
     pub fn set_metadata(&mut self, metadata: Option<String> ) {
         self.metadata = metadata;
     }
+
+    pub fn show(&self) {
+        println!("datetime_done {}", self.datetime_done);
+        match &self.metadata {
+            Some(x) => println!("metadata : {}", x),
+            _ => ()
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]

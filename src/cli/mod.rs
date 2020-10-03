@@ -28,6 +28,7 @@ pub fn print_help() {
         \t--begin <NAME> <DATE>                      Change begin date of the habit (default: today)\n\
         \t--end  <NAME> <TIME> <TIME_TYPE>           Add endtime for the habit (default: none)\n\
         \t--meta <NAME> <META>                       Add metadata to the habit\n\
+        \t--history <NAME>                           History for the given habits\n\
         \t--missing <NAME>                           List every day the habit has been missed\n\n\
         \t--help                                     Show help\n\
         "
@@ -40,6 +41,7 @@ pub fn handle_args() -> HashMap<&'static str, ArgumentTypes<bool, String, Vec<St
     let args : Vec<_> =  env::args().collect();
     let mut i = 1;
     while i < args.len() {
+        // use macro
         if Regex::new(r"^--list$").unwrap().is_match(&args[i]) {
             options.insert("LIST", ArgumentTypes::TypeA(true));
         }
@@ -106,6 +108,13 @@ pub fn handle_args() -> HashMap<&'static str, ArgumentTypes<bool, String, Vec<St
             options.insert("META", ArgumentTypes::TypeC(meta_args));
             i+= 2;
         }
+        else if Regex::new(r"^--history$").unwrap().is_match(&args[i]) {
+            if i+1 >= args.len() {
+                panic!("Missing --history argument: name of the habit");
+            }
+            options.insert("HISTORY", ArgumentTypes::TypeB(args[i+1].to_string()));
+            i+= 1;
+        }
         else if Regex::new(r"^--missing$").unwrap().is_match(&args[i]) {
             if i+1 >= args.len() {
                 panic!("Missing --missing argument: name of the habit");
@@ -127,8 +136,14 @@ pub fn handle_cli() {
     const FILE_NAME: &str = "habit_database.json";
     let options = handle_args();
 
+    if options.len() == 0 {
+        print_help();
+        return;
+    }
+
     let mut db = open_database(FILE_NAME);
 
+    //use macro
     match options.get(&"LIST") {
         Some(_) => printdb(db.as_slice()),
         _ => ()
@@ -204,6 +219,12 @@ pub fn handle_cli() {
             end_habit_in_db(&mut db, &data[0], &data[1], &data[2]);
             save_database(&db, FILE_NAME)
                 .expect("Unable to save database");
+        },
+        _ => ()
+    }
+    match options.get(&"HISTORY") {
+        Some(ArgumentTypes::TypeB(data)) => {
+            history_habit_in_db(&mut db, &data);
         },
         _ => ()
     }

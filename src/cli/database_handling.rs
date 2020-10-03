@@ -142,8 +142,8 @@ pub fn end_habit_in_db(db: &mut Vec<Habit>,
         }
     }
     else if end_type.to_lowercase() == "on" {
-            let date = chrono::NaiveDate::parse_from_str(time_or_occurrence, "%Y-%m-%d")
-            .expect("Error time could not be parsed");
+        let date = chrono::NaiveDate::parse_from_str(time_or_occurrence, "%Y-%m-%d")
+        .expect("Error time could not be parsed");
         for x in db {
             if x.name() == habit_name {
                 x.set_end_type(&EndRepeatType::On(date));
@@ -193,6 +193,16 @@ pub fn freq_habit_in_db(db: &mut Vec<Habit>,
                     }
                 }
                 _ => (),
+            }
+        }
+    }
+}
+
+pub fn history_habit_in_db(db: &mut Vec<Habit>, habit_name: &str) {
+    for x in db {
+        if x.name() == habit_name {
+            for y in x.history().iter() {
+                y.show();
             }
         }
     }
